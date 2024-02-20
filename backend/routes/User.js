@@ -7,6 +7,7 @@ const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require("../validation/login");
 
 const User = require("../models/User");
+const verifyToken = require("../middleware/Token");
 
 router.post("/register",(req,res)=>{
 
@@ -74,5 +75,29 @@ router.post("/login",(req,res)=>{
         });
     });
 });
+
+
+// Test route that requires authentication
+router.get("/protected", verifyToken, async (req, res) => {
+    try {
+
+        const user = req.user;
+      // req.user now contains the decoded user information from the token
+      const userId = req.user.id;
+  
+      // Find the user in MongoDB by their ID
+      const userDb = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // You can use `user` to access all user properties
+      res.json({ message: "Access granted", user,userDetails:userDb });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
 module.exports=router;
