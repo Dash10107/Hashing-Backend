@@ -41,7 +41,8 @@ require("./config/passport")(passport);
   //Routes 
 const users = require("./routes/User");
 app.use("/users",users);
-
+const watchlist = require('./routes/Watchlist')
+app.use('/watchlists',watchlist);
 
 
 
