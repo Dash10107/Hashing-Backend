@@ -53,12 +53,7 @@ router.delete('/:symbol', verifyToken, async (req, res) => {
         return res.status(404).json({ message: "Watchlist not found" });
       }
   
-      // Check if symbol was found and removed from the watchlist
-      if (watchlist.symbols.includes(req.params.symbol)) {
-        res.json(watchlist);
-      } else {
-        res.status(404).json({ message: "Symbol not found in watchlist" });
-      }
+      res.json(watchlist);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
