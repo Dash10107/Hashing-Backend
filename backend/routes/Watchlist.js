@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Watchlist = require('../models/Watchlist');
 const verifyToken = require('../middleware/Token');
-
+const fs = require('fs');
+const path = require('path');
+const csv = require('csv-parser');
 // Get watchlist by user ID
 router.get('/', verifyToken, async (req, res) => {
   try {
@@ -60,6 +62,35 @@ router.delete('/:symbol', verifyToken, async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
+  });
+
+
+  // Define the route to fetch options
+  router.get('/options', verifyToken,(req, res) => {
+    const options = [];
+  
+    // Construct the absolute path to the CSV file
+    const csvFilePath = path.join(__dirname, 'list.csv');
+  
+    // Read the CSV file and parse it
+    fs.createReadStream(csvFilePath)
+      .pipe(csv({ separator: ',' }))
+      .on('data', (row) => {
+        // Extract symbol and company name from each row
+        const symbol = row.Symbol;
+        const name = row.Name;    
+        // Push symbol and company name to the options array
+        options.push({ value: symbol, label: `${symbol} - ${name}` });
+      })
+      .on('end', () => {
+        // Send the options array as response
+        res.json(options);
+      })
+      .on('error', (err) => {
+        // Handle error if any
+        console.error(err);
+        res.status(500).json({ message: 'Failed to fetch options' });
+      });
   });
   
 module.exports = router;
